@@ -1,11 +1,15 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional, List, Dict, Set
+from typing import Optional, List, Dict, Set, Literal
 import asyncio
 import os
 
-from .client import EngineClient
-from .clickhouse import ClickHouseQueryService
+try:
+    from client import EngineClient
+    from clickhouse import ClickHouseQueryService
+except ImportError:
+    from .client import EngineClient
+    from .clickhouse import ClickHouseQueryService
 
 app = FastAPI(
     title="poly-pnl API",
@@ -60,8 +64,11 @@ async def startup_event():
         while True:
             await asyncio.sleep(1.0)
             if manager.active_connections:
-                lb = engine_client.get_leaderboard(k=50)
-                await manager.broadcast_leaderboard(lb)
+                try:
+                    lb = await asyncio.to_thread(engine_client.get_leaderboard, 50)
+                    await manager.broadcast_leaderboard(lb)
+                except Exception:
+                    pass
     asyncio.create_task(push_loop())
 
 @app.get("/health")
@@ -76,8 +83,8 @@ def health():
 
 @app.get("/leaderboard")
 def get_leaderboard(
-    metric: str = Query("pnl", enum=["pnl", "volume", "win_rate"]),
-    window: str = Query("all", enum=["all", "30d", "7d", "24h"]),
+    metric: Literal["pnl", "volume", "win_rate"] = "pnl",
+    window: Literal["all", "30d", "7d", "24h"] = "all",
     limit: int = Query(50, ge=1, le=500)
 ):
     """Serve live leaderboard from C++ in-memory top-K heap."""
