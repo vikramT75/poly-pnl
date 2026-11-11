@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  cpp-tests:
+    name: C++20 Core & Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libgtest-dev libbenchmark-dev
+
+      - name: Configure CMake
+        run: |
+          if [ "${{ matrix.compiler }}" = "clang" ]; then
+            export CC=clang CXX=clang++
+          fi
+          mkdir build && cd build
+          cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DGRAVIA_ENABLE_ASAN=ON -DGRAVIA_ENABLE_UBSAN=ON ..
+
+      - name: Build
+        run: |
+          cd build && ninja gravia_tests gravia_engine_daemon
+
+      - name: Run Tests with Sanitizers
+        run: |
+          cd build && ctest --output-on-failure
+
+  python-tests:
+    name: Python Ingestor & API Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy pytest
+          pip install -e ingest/
+
+      - name: Lint with Ruff
+        run: ruff check ingest/
+
+      - name: Type check with Mypy
+        run: mypy ingest/src/
+
+      - name: Run Pytest
+        run: pytest ingest/tests/ -v
+
+  benchmarks:
+    name: Microbenchmark Regression Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+
+      - name: Build Benchmarks
+        run: |
+          g++ -std=c++20 -O3 -march=native -Icore/include bench/decoder_bench.cpp core/src/decoder/decoder.cpp -o bench_decoder
+          g++ -std=c++20 -O3 -march=native -Icore/include bench/engine_bench.cpp core/src/engine/engine.cpp -o bench_engine
+          g++ -std=c++20 -O3 -march=native -Icore/include bench/hashmap_bench.cpp core/src/engine/engine.cpp -o bench_hashmap
+
+      - name: Execute Benchmarks
+        run: |
+          ./bench_decoder
+          ./bench_engine
+          ./bench_hashmap

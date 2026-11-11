@@ -1,0 +1,137 @@
+version: "3.8"
+
+networks:
+  gravia:
+    driver: bridge
+
+volumes:
+  clickhouse_data:
+  clickhouse_logs:
+  engine_snapshots:
+  prometheus_data:
+  grafana_data:
+
+services:
+  # ClickHouse Columnar Store for raw logs and historical events
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: gravia-clickhouse
+    networks:
+      - gravia
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - clickhouse_logs:/var/log/clickhouse-server
+      - ./clickhouse/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    restart: unless-stopped
+
+  # C++20 Core PnL Engine Daemon
+  engine:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.engine
+    container_name: gravia-engine
+    networks:
+      - gravia
+    ports:
+      - "9998:9998" # Query API port
+    volumes:
+      - engine_snapshots:/app/snapshots
+    depends_on:
+      - clickhouse
+    restart: unless-stopped
+
+  # Python 3.12+ Async Ingestion Service
+  ingestor:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.ingestor
+    container_name: gravia-ingestor
+    networks:
+      - gravia
+    environment:
+      - POLYGON_RPC_WS=${POLYGON_RPC_WS:-wss://polygon-mainnet.g.alchemy.com/v2/demo}
+      - HYPERSYNC_URL=${HYPERSYNC_URL:-https://polygon.hypersync.xyz}
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=8123
+      - ENGINE_HOST=engine
+      - ENGINE_PORT=9999
+      - BACKFILL_DAYS=${BACKFILL_DAYS:-90}
+      - REORG_WINDOW=${REORG_WINDOW:-128}
+      - METRICS_PORT=9090
+    depends_on:
+      - clickhouse
+      - engine
+    restart: unless-stopped
+
+  # Python FastAPI Server (REST + WebSocket)
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    container_name: gravia-api
+    networks:
+      - gravia
+    ports:
+      - "8080:8080"
+    environment:
+      - ENGINE_HOST=engine
+      - ENGINE_QUERY_PORT=9998
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_PORT=8123
+    depends_on:
+      - engine
+      - clickhouse
+    restart: unless-stopped
+
+  # Next.js Frontend Dashboard
+  web:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.web
+    container_name: gravia-web
+    networks:
+      - gravia
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Prometheus Metrics Collector
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: gravia-prometheus
+    networks:
+      - gravia
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    restart: unless-stopped
+
+  # Grafana Dashboards
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: gravia-grafana
+    networks:
+      - gravia
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=gravia
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    restart: unless-stopped
