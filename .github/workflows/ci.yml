@@ -18,8 +18,9 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libgtest-dev libbenchmark-dev
+          sudo sed -i 's/azure\.archive\.ubuntu\.com/archive\.ubuntu\.com/g' /etc/apt/sources.list /etc/apt/sources.list.d/* /etc/apt/apt-mirrors.txt 2>/dev/null || true
+          for i in 1 2 3; do sudo apt-get update -o Acquire::Retries=3 && break || sleep 2; done
+          sudo apt-get install -y -o Acquire::Retries=3 --no-install-recommends cmake ninja-build libgtest-dev libbenchmark-dev || true
 
       - name: Configure CMake
         run: |
@@ -69,8 +70,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+      - name: Verify Compiler
+        run: g++ --version
 
       - name: Build Benchmarks
         run: |

@@ -86,23 +86,31 @@ endif()
 enable_testing()
 
 find_package(GTest QUIET)
-if(GTest_FOUND)
-    add_executable(poly_tests
-        tests/unit/decoder_test.cpp
-        tests/unit/engine_test.cpp
-        tests/unit/fixedpoint_test.cpp
-        tests/property/determinism_test.cpp
-        tests/property/rounding_test.cpp
+if(NOT GTest_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz
     )
-    target_link_libraries(poly_tests PRIVATE poly_core GTest::gtest_main pthread)
-    target_compile_options(poly_tests PRIVATE -fsanitize=address,undefined)
-    target_link_options(poly_tests PRIVATE -fsanitize=address,undefined)
-
-    include(GoogleTest)
-    gtest_discover_tests(poly_tests)
-else()
-    message(WARNING "GoogleTest not found — unit tests will not be built. Install with: apt install libgtest-dev")
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
 endif()
+
+add_executable(poly_tests
+    tests/unit/decoder_test.cpp
+    tests/unit/engine_test.cpp
+    tests/unit/fixedpoint_test.cpp
+    tests/property/determinism_test.cpp
+    tests/property/rounding_test.cpp
+)
+target_link_libraries(poly_tests PRIVATE poly_core GTest::gtest_main pthread)
+target_compile_options(poly_tests PRIVATE -fsanitize=address,undefined)
+target_link_options(poly_tests PRIVATE -fsanitize=address,undefined)
+
+include(GoogleTest)
+gtest_discover_tests(poly_tests)
 
 # ---------------------------------------------------------------------------
 # Fuzz targets (clang + libFuzzer)
