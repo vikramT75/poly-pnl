@@ -54,7 +54,9 @@ services:
     networks:
       - polypnl
     environment:
-      - POLYGON_RPC_WS=${POLYGON_RPC_WS:-wss://polygon-mainnet.g.alchemy.com/v2/demo}
+      - POLYGON_RPC_WS=${POLYGON_RPC_WS:-wss://polygon-bor-rpc.publicnode.com}
+      - POLYGON_RPC_HTTP=${POLYGON_RPC_HTTP:-https://polygon-bor-rpc.publicnode.com}
+      - POLYGON_RPC_FALLBACK_HTTP=${POLYGON_RPC_FALLBACK_HTTP:-https://1rpc.io/matic}
       - HYPERSYNC_URL=${HYPERSYNC_URL:-https://polygon.hypersync.xyz}
       - CLICKHOUSE_HOST=clickhouse
       - CLICKHOUSE_PORT=8123

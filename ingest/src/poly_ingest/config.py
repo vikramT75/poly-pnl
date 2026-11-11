@@ -4,15 +4,15 @@ from pydantic import Field
 class IngestConfig(BaseSettings):
     # Polygon RPC
     polygon_rpc_ws: str = Field(
-        default="wss://polygon-mainnet.g.alchemy.com/v2/demo",
+        default="wss://polygon-bor-rpc.publicnode.com",
         validation_alias="POLYGON_RPC_WS"
     )
     polygon_rpc_http: str = Field(
-        default="https://polygon-mainnet.g.alchemy.com/v2/demo",
+        default="https://polygon-bor-rpc.publicnode.com",
         validation_alias="POLYGON_RPC_HTTP"
     )
     polygon_rpc_fallback_http: str = Field(
-        default="https://polygon-rpc.com",
+        default="https://1rpc.io/matic",
         validation_alias="POLYGON_RPC_FALLBACK_HTTP"
     )
 
