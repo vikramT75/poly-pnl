@@ -1,0 +1,17 @@
+[project]
+name = "gravia-api"
+version = "0.1.0"
+description = "FastAPI Query & Real-time WebSocket Push Server for gravia-pnl"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "clickhouse-connect>=0.7.16",
+    "orjson>=3.10.0",
+    "pydantic>=2.7.0",
+    "prometheus-client>=0.20.0"
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
