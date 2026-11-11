@@ -1,8 +1,9 @@
 import asyncio
-import aiohttp
 import json
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+
+import aiohttp
+
 
 @dataclass
 class MarketMetadata:
@@ -14,15 +15,16 @@ class MarketMetadata:
     payout_yes: int  # 0 or 1_000_000
     payout_no: int
 
+
 class GammaMetadataWorker:
     def __init__(self, gamma_api_url: str = "https://gamma-api.polymarket.com") -> None:
         self.api_url = gamma_api_url.rstrip("/")
-        self.cache: Dict[str, MarketMetadata] = {} # condition_id -> MarketMetadata
-        self.token_to_condition: Dict[str, str] = {} # token_id -> condition_id
+        self.cache: dict[str, MarketMetadata] = {}  # condition_id -> MarketMetadata
+        self.token_to_condition: dict[str, str] = {}  # token_id -> condition_id
 
-    async def fetch_markets(self, limit: int = 100) -> List[MarketMetadata]:
+    async def fetch_markets(self, limit: int = 100) -> list[MarketMetadata]:
         url = f"{self.api_url}/markets?limit={limit}&active=true"
-        markets: List[MarketMetadata] = []
+        markets: list[MarketMetadata] = []
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -43,7 +45,7 @@ class GammaMetadataWorker:
                                     clob_token_ids = []
 
                             yes_id = clob_token_ids[0] if len(clob_token_ids) > 0 else ""
-                            no_id  = clob_token_ids[1] if len(clob_token_ids) > 1 else ""
+                            no_id = clob_token_ids[1] if len(clob_token_ids) > 1 else ""
 
                             resolved = bool(item.get("resolved", False))
                             meta = MarketMetadata(
@@ -53,7 +55,7 @@ class GammaMetadataWorker:
                                 no_token_id=no_id,
                                 resolved=resolved,
                                 payout_yes=1_000_000 if resolved else 0,
-                                payout_no=0
+                                payout_no=0,
                             )
                             markets.append(meta)
                             self.cache[meta.condition_id] = meta
@@ -71,5 +73,5 @@ class GammaMetadataWorker:
             await self.fetch_markets()
             await asyncio.sleep(interval_seconds)
 
-    def get_market(self, condition_id: str) -> Optional[MarketMetadata]:
+    def get_market(self, condition_id: str) -> MarketMetadata | None:
         return self.cache.get(condition_id.lower())

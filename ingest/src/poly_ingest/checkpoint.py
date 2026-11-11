@@ -1,9 +1,9 @@
-import os
 import json
+import os
 import tempfile
-from dataclasses import dataclass, asdict
-from typing import Optional
 import time
+from dataclasses import asdict, dataclass
+
 
 @dataclass
 class Checkpoint:
@@ -16,6 +16,7 @@ class Checkpoint:
     def empty(cls) -> "Checkpoint":
         return cls(last_block=0, last_log_index=0, block_hash="", timestamp=time.time())
 
+
 class CheckpointManager:
     def __init__(self, filepath: str) -> None:
         self.filepath = filepath
@@ -25,7 +26,7 @@ class CheckpointManager:
         if not os.path.exists(self.filepath):
             return Checkpoint.empty()
         try:
-            with open(self.filepath, "r", encoding="utf-8") as f:
+            with open(self.filepath, encoding="utf-8") as f:
                 data = json.load(f)
                 return Checkpoint(
                     last_block=int(data.get("last_block", 0)),

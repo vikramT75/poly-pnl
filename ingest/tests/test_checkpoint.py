@@ -1,7 +1,9 @@
 import os
 import tempfile
 import time
-from poly_ingest.checkpoint import CheckpointManager, Checkpoint
+
+from poly_ingest.checkpoint import Checkpoint, CheckpointManager
+
 
 def test_checkpoint_roundtrip():
     with tempfile.TemporaryDirectory() as tmpdir:

@@ -1,9 +1,10 @@
 import asyncio
 import signal
-import sys
+
 from .config import IngestConfig
 from .metrics import start_metrics_server
 from .pipeline import IngestionPipeline
+
 
 def main() -> None:
     print("========================================================")
@@ -23,7 +24,7 @@ def main() -> None:
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 
-    def shutdown():
+    def shutdown() -> None:
         print("\n[Main] Shutdown signal received, stopping ingestion pipeline...")
         loop.create_task(pipeline.stop())
 
@@ -41,6 +42,7 @@ def main() -> None:
     finally:
         loop.close()
         print("[Main] Ingestor stopped cleanly.")
+
 
 if __name__ == "__main__":
     main()

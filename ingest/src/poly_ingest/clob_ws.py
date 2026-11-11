@@ -1,8 +1,10 @@
 import asyncio
 import json
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
-from typing import AsyncGenerator, List, Set, Optional
+
 import websockets
+
 
 @dataclass
 class MarkUpdateItem:
@@ -10,13 +12,16 @@ class MarkUpdateItem:
     mark_price: int  # 1e-6 scale (e.g. $0.65 -> 650_000)
     timestamp_ms: int
 
+
 class ClobWebSocketConsumer:
-    def __init__(self, ws_url: str = "wss://ws-subscriptions-clob.polymarket.com/ws/market") -> None:
+    def __init__(
+        self, ws_url: str = "wss://ws-subscriptions-clob.polymarket.com/ws/market"
+    ) -> None:
         self.ws_url = ws_url
-        self.subscribed_tokens: Set[str] = set()
+        self.subscribed_tokens: set[str] = set()
         self.running = False
 
-    def add_tokens(self, tokens: List[str]) -> None:
+    def add_tokens(self, tokens: list[str]) -> None:
         for t in tokens:
             if t:
                 self.subscribed_tokens.add(t)
@@ -33,12 +38,12 @@ class ClobWebSocketConsumer:
                             "assets_ids": list(self.subscribed_tokens)[:100],
                             "type": "market",
                             "initial_dump": True,
-                            "custom_feature_enabled": True
+                            "custom_feature_enabled": True,
                         }
                         await ws.send(json.dumps(sub_msg))
 
                     # Background keepalive task: send "PING" every 10 seconds
-                    async def keepalive():
+                    async def keepalive() -> None:
                         while self.running:
                             await asyncio.sleep(10.0)
                             try:
@@ -68,7 +73,7 @@ class ClobWebSocketConsumer:
                                     yield MarkUpdateItem(
                                         token_id=asset_id,
                                         mark_price=int_price,
-                                        timestamp_ms=int(asyncio.get_event_loop().time() * 1000)
+                                        timestamp_ms=int(asyncio.get_event_loop().time() * 1000),
                                     )
                     finally:
                         ping_task.cancel()
