@@ -20,12 +20,12 @@ protected:
 
     void SetUp() override {
         intern_tables.intern_wallet = [](const uint8_t addr[20], void* ctx) noexcept -> WalletIdx {
-            return static_cast<WalletInternTable*>(ctx)->intern(addr);
+            return static_cast<DecoderTest*>(ctx)->wallet_table.intern(addr);
         };
         intern_tables.intern_token = [](const uint8_t token[32], void* ctx) noexcept -> TokenIdx {
-            return static_cast<TokenInternTable*>(ctx)->intern(token);
+            return static_cast<DecoderTest*>(ctx)->token_table.intern(token);
         };
-        intern_tables.ctx = &wallet_table; // token_table can be accessed via separate wrapper if needed
+        intern_tables.ctx = this;
         decoder = std::make_unique<Decoder>(intern_tables);
     }
 
