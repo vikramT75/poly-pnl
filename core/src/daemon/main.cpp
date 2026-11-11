@@ -16,7 +16,7 @@
   #include <winsock2.h>
 #endif
 
-using namespace gravia;
+using namespace polypnl;
 
 static std::atomic<bool> g_shutdown{false};
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
     WSAStartup(MAKEWORD(2, 2), &wsa);
 #endif
     std::cout << "========================================================\n"
-              << "       gravia-pnl: High-Performance Polymarket PnL Engine \n"
+              << "       poly-pnl: High-Performance Polymarket PnL Engine \n"
               << "========================================================" << std::endl;
 
     std::signal(SIGINT, signal_handler);
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     }
 
     // 5. Start Ingestor Socket Reader (port 9999)
-    daemon::SocketReader socket_reader("/tmp/gravia_engine.sock", log_decoder, pnl_engine);
+    daemon::SocketReader socket_reader("/tmp/poly_engine.sock", log_decoder, pnl_engine);
     socket_reader.start();
 
     // 6. Start Query API Server (port 9998)

@@ -1,5 +1,5 @@
 networks:
-  gravia:
+  polypnl:
     driver: bridge
 
 volumes:
@@ -13,9 +13,9 @@ services:
   # ClickHouse Columnar Store for raw logs and historical events
   clickhouse:
     image: clickhouse/clickhouse-server:24.3-alpine
-    container_name: gravia-clickhouse
+    container_name: poly-clickhouse
     networks:
-      - gravia
+      - polypnl
     ports:
       - "8123:8123"
       - "9000:9000"
@@ -34,9 +34,9 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.engine
-    container_name: gravia-engine
+    container_name: poly-engine
     networks:
-      - gravia
+      - polypnl
     ports:
       - "9998:9998" # Query API port
     volumes:
@@ -50,14 +50,15 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.ingestor
-    container_name: gravia-ingestor
+    container_name: poly-ingestor
     networks:
-      - gravia
+      - polypnl
     environment:
       - POLYGON_RPC_WS=${POLYGON_RPC_WS:-wss://polygon-mainnet.g.alchemy.com/v2/demo}
       - HYPERSYNC_URL=${HYPERSYNC_URL:-https://polygon.hypersync.xyz}
       - CLICKHOUSE_HOST=clickhouse
       - CLICKHOUSE_PORT=8123
+      - CLICKHOUSE_DATABASE=polypnl
       - ENGINE_HOST=engine
       - ENGINE_PORT=9999
       - BACKFILL_DAYS=${BACKFILL_DAYS:-90}
@@ -73,9 +74,9 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.api
-    container_name: gravia-api
+    container_name: poly-api
     networks:
-      - gravia
+      - polypnl
     ports:
       - "8080:8080"
     environment:
@@ -83,6 +84,7 @@ services:
       - ENGINE_QUERY_PORT=9998
       - CLICKHOUSE_HOST=clickhouse
       - CLICKHOUSE_PORT=8123
+      - CLICKHOUSE_DATABASE=polypnl
     depends_on:
       - engine
       - clickhouse
@@ -93,9 +95,9 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.web
-    container_name: gravia-web
+    container_name: poly-web
     networks:
-      - gravia
+      - polypnl
     ports:
       - "3000:3000"
     depends_on:
@@ -105,9 +107,9 @@ services:
   # Prometheus Metrics Collector
   prometheus:
     image: prom/prometheus:v2.51.2
-    container_name: gravia-prometheus
+    container_name: poly-prometheus
     networks:
-      - gravia
+      - polypnl
     ports:
       - "9091:9090"
     volumes:
@@ -118,14 +120,14 @@ services:
   # Grafana Dashboards
   grafana:
     image: grafana/grafana:10.4.2
-    container_name: gravia-grafana
+    container_name: poly-grafana
     networks:
-      - gravia
+      - polypnl
     ports:
       - "3001:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=gravia
+      - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana

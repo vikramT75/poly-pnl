@@ -1,7 +1,7 @@
 # Limitations
 
 Honest documentation of known inaccuracies, unsupported cases, and scale caveats.
-This section is required reading before interpreting any output from gravia-pnl.
+This section is required reading before interpreting any output from poly-pnl.
 
 ---
 

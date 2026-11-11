@@ -20,7 +20,7 @@
   #define CLOSE_SOCK close
 #endif
 
-namespace gravia {
+namespace polypnl {
 namespace daemon {
 
 QueryServer::QueryServer(int port,
@@ -200,4 +200,4 @@ void QueryServer::run() {
 }
 
 } // namespace daemon
-} // namespace gravia
+} // namespace polypnl

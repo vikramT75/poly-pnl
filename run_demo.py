@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-gravia-pnl Quick Demonstration Runner
+poly-pnl Quick Demonstration Runner
 Runs the native C++ PnL Engine daemon, streams realistic Polymarket trades,
 and prints the live computed leaderboard and stats!
 """
@@ -13,12 +13,12 @@ import struct
 import os
 import sys
 
-ENGINE_EXE = os.path.join(os.path.dirname(__file__), "core", "gravia_engine_daemon.exe")
+ENGINE_EXE = os.path.join(os.path.dirname(__file__), "core", "poly_engine_daemon.exe")
 RAWLOG_STRUCT = struct.Struct("<QQII20s128sB3sI1024s4s")
 
 def main():
     print("=" * 65)
-    print("        GRAVIA-PNL: LIVE ENGINE LOCAL DEMONSTRATION")
+    print("        POLY-PNL: LIVE ENGINE LOCAL DEMONSTRATION")
     print("=" * 65)
 
     if not os.path.exists(ENGINE_EXE):

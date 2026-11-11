@@ -5,8 +5,8 @@
 #include "decoder.h"
 #include "intern_table.h"
 
-using namespace gravia;
-using namespace gravia::decoder;
+using namespace polypnl;
+using namespace polypnl::decoder;
 
 namespace {
 

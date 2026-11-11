@@ -1,7 +1,7 @@
 [project]
-name = "gravia-api"
+name = "poly-api"
 version = "0.1.0"
-description = "FastAPI Query & Real-time WebSocket Push Server for gravia-pnl"
+description = "FastAPI Query & Real-time WebSocket Push Server for poly-pnl"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.111.0",

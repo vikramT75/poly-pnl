@@ -1,4 +1,4 @@
-from gravia_ingest.reorg import ReorgTracker, BlockHeader
+from poly_ingest.reorg import ReorgTracker, BlockHeader
 
 def test_sequential_blocks_no_reorg():
     tracker = ReorgTracker(window_size=10)

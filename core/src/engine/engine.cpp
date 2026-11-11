@@ -11,7 +11,7 @@
 // All edge-case policies are in docs/EDGE_CASES.md.
 // ============================================================================
 
-namespace gravia {
+namespace polypnl {
 namespace engine {
 
 // ---------------------------------------------------------------------------
@@ -548,4 +548,4 @@ std::vector<LeaderboardEntry> PnLEngine::get_leaderboard(int k) const {
 }
 
 } // namespace engine
-} // namespace gravia
+} // namespace polypnl

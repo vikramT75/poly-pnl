@@ -28,7 +28,7 @@
 // See docs/EDGE_CASES.md for all edge-case policies.
 // ============================================================================
 
-namespace gravia {
+namespace polypnl {
 namespace engine {
 
 // ---------------------------------------------------------------------------
@@ -274,4 +274,4 @@ private:
 };
 
 } // namespace engine
-} // namespace gravia
+} // namespace polypnl

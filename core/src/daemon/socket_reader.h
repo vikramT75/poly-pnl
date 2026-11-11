@@ -6,7 +6,7 @@
 #include "decoder.h"
 #include "engine.h"
 
-namespace gravia {
+namespace polypnl {
 namespace daemon {
 
 class SocketReader {
@@ -30,4 +30,4 @@ private:
 };
 
 } // namespace daemon
-} // namespace gravia
+} // namespace polypnl

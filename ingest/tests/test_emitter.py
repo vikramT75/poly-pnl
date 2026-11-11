@@ -1,5 +1,5 @@
 import struct
-from gravia_ingest.emitter import RawLogItem, encode_raw_log, encode_rollback, RAWLOG_STRUCT
+from poly_ingest.emitter import RawLogItem, encode_raw_log, encode_rollback, RAWLOG_STRUCT
 
 def test_raw_log_binary_layout():
     item = RawLogItem(

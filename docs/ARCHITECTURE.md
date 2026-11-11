@@ -1,6 +1,6 @@
 # Architecture & System Design
 
-`gravia-pnl` is a high-performance, real-time Profit and Loss (PnL) engine designed to track 2M+ Polymarket traders on Polygon with incremental updates and sub-100 microsecond leaderboard recalculation.
+`poly-pnl` is a high-performance, real-time Profit and Loss (PnL) engine designed to track 2M+ Polymarket traders on Polygon with incremental updates and sub-100 microsecond leaderboard recalculation.
 
 ---
 

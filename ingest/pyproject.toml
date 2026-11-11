@@ -1,5 +1,5 @@
 [project]
-name = "gravia-ingest"
+name = "poly-ingest"
 version = "0.1.0"
 description = "High-performance real-time ingestion layer for Polymarket on Polygon"
 readme = "README.md"
@@ -26,7 +26,7 @@ dev = [
 ]
 
 [project.scripts]
-gravia-ingest = "gravia_ingest.main:main"
+poly-ingest = "poly_ingest.main:main"
 
 [build-system]
 requires = ["setuptools>=68.0"]

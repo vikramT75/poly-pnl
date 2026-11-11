@@ -1,6 +1,6 @@
 # Performance Engineering & Measurements
 
-This document details the benchmarking methodology, profiling data, and optimization achievements for `gravia-pnl`.
+This document details the benchmarking methodology, profiling data, and optimization achievements for `poly-pnl`.
 
 ---
 
@@ -21,7 +21,7 @@ Executed on standard modern hardware (x86-64, GCC 16.2 `-O3 -march=native`):
 
 ## 2. Memory Footprint Analysis
 
-Target: Support Gravia's 2M+ active Polymarket traders in RAM.
+Target: Support 2M+ active Polymarket traders in RAM.
 
 - **`Position` Struct:** exactly 48 bytes (aligned to 8 bytes).
 - **`NormalizedEvent` Struct:** exactly 64 bytes (1 cache line).
@@ -37,7 +37,7 @@ Target: Support Gravia's 2M+ active Polymarket traders in RAM.
 
 ### 1. Zero-Copy Hand-Written ABI Decoding
 Generic EVM ABI decoders parse JSON ABIs, allocate dynamic strings, and handle arbitrary types.
-`gravia-pnl` uses direct bit-shifting and fixed byte offsets based on the verified Polymarket contracts:
+`poly-pnl` uses direct bit-shifting and fixed byte offsets based on the verified Polymarket contracts:
 - Big-endian `int64_t` reading takes 4 bit-shift operations.
 - Zero heap allocation throughout decoding.
 - Result: **3.4 Million events decoded per second on a single thread**.

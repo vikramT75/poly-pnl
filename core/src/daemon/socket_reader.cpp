@@ -22,7 +22,7 @@
   #define CLOSE_SOCK close
 #endif
 
-namespace gravia {
+namespace polypnl {
 namespace daemon {
 
 SocketReader::SocketReader(std::string socket_path,
@@ -162,4 +162,4 @@ void SocketReader::run() {
 }
 
 } // namespace daemon
-} // namespace gravia
+} // namespace polypnl

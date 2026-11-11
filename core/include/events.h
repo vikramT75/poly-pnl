@@ -4,7 +4,7 @@
 #include <cstddef>
 
 // ============================================================================
-// Normalized event structs for the gravia-pnl engine.
+// Normalized event structs for the poly-pnl engine.
 //
 // Design constraints:
 //   - Fixed size: enables cache-friendly arrays and zero-copy IPC transport
@@ -16,7 +16,7 @@
 //   - Token IDs:           uint32_t interned index (256-bit token_id → dense uint32)
 // ============================================================================
 
-namespace gravia {
+namespace polypnl {
 
 // ---------------------------------------------------------------------------
 // Interned ID types (opaque integers; meaning comes from the intern tables)
@@ -181,4 +181,4 @@ struct Position {
 static_assert(sizeof(Position) == 48, "Position must be 48 bytes");
 static_assert(alignof(Position) == 8);
 
-} // namespace gravia
+} // namespace polypnl

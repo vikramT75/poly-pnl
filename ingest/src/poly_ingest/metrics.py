@@ -2,54 +2,54 @@ from prometheus_client import Counter, Gauge, start_http_server
 
 # Metrics specified in Master Prompt Section 5.1
 BLOCKS_BEHIND_HEAD = Gauge(
-    "gravia_ingest_blocks_behind_head",
+    "poly_ingest_blocks_behind_head",
     "Estimated number of blocks behind chain head"
 )
 
 EVENTS_PER_SECOND = Gauge(
-    "gravia_ingest_events_per_second",
+    "poly_ingest_events_per_second",
     "Current event ingestion throughput per second"
 )
 
 REORGS_TOTAL = Counter(
-    "gravia_ingest_reorgs_total",
+    "poly_ingest_reorgs_total",
     "Total number of blockchain reorgs detected and rolled back"
 )
 
 GAP_FILLS_TOTAL = Counter(
-    "gravia_ingest_gap_fills_total",
+    "poly_ingest_gap_fills_total",
     "Total number of missing block range reconciliations executed"
 )
 
 WS_RECONNECTS_TOTAL = Counter(
-    "gravia_ingest_ws_reconnects_total",
+    "poly_ingest_ws_reconnects_total",
     "Total WebSocket disconnections and reconnects"
 )
 
 QUEUE_DEPTH = Gauge(
-    "gravia_ingest_queue_depth",
+    "poly_ingest_queue_depth",
     "Number of raw logs queued for engine socket delivery"
 )
 
 ERROR_RATE = Counter(
-    "gravia_ingest_error_rate",
+    "poly_ingest_error_rate",
     "Total errors encountered in ingestion loop",
     ["type"]
 )
 
 LAST_BLOCK_PROCESSED = Gauge(
-    "gravia_ingest_last_block_processed",
+    "poly_ingest_last_block_processed",
     "Latest block number committed to checkpoint"
 )
 
 CLICKHOUSE_ROWS_WRITTEN = Counter(
-    "gravia_clickhouse_rows_written_total",
+    "poly_clickhouse_rows_written_total",
     "Total rows written to ClickHouse",
     ["table"]
 )
 
 CLICKHOUSE_WRITE_ERRORS = Counter(
-    "gravia_clickhouse_write_errors_total",
+    "poly_clickhouse_write_errors_total",
     "ClickHouse batch insertion errors"
 )
 

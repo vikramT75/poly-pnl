@@ -22,7 +22,7 @@
 //   - Keys are stored contiguously for cache efficiency
 // ============================================================================
 
-namespace gravia {
+namespace polypnl {
 
 template <size_t KEY_SIZE>
 class InternTable {
@@ -142,4 +142,4 @@ private:
 using WalletInternTable = InternTable<20>;
 using TokenInternTable  = InternTable<32>;
 
-} // namespace gravia
+} // namespace polypnl

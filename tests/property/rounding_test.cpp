@@ -2,8 +2,8 @@
 #include <random>
 #include "engine.h"
 
-using namespace gravia;
-using namespace gravia::engine;
+using namespace polypnl;
+using namespace polypnl::engine;
 
 namespace {
 

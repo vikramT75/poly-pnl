@@ -6,7 +6,7 @@ from .metrics import CLICKHOUSE_ROWS_WRITTEN, CLICKHOUSE_WRITE_ERRORS
 
 class ClickHouseWriter:
     def __init__(self, host: str = "localhost", port: int = 8123,
-                 user: str = "default", password: str = "", database: str = "gravia") -> None:
+                 user: str = "default", password: str = "", database: str = "polypnl") -> None:
         self.host = host
         self.port = port
         self.user = user

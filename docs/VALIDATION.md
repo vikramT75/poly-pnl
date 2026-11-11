@@ -1,6 +1,6 @@
 # Validation Methodology & Golden Test Results
 
-This document describes how `gravia-pnl` correctness is validated against Polymarket's official Data API (`https://data-api.polymarket.com/v2/positions`).
+This document describes how `poly-pnl` correctness is validated against Polymarket's official Data API (`https://data-api.polymarket.com/v2/positions`).
 
 ---
 

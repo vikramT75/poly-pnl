@@ -13,7 +13,7 @@
 // V1/V2 awareness: See docs/CONTRACTS_AND_APIS.md for the full upgrade story.
 // ============================================================================
 
-namespace gravia {
+namespace polypnl {
 namespace decoder {
 
 // ---------------------------------------------------------------------------
@@ -603,4 +603,4 @@ int Decoder::decode_positions_converted(const RawLog& log, NormalizedEvent* out)
 }
 
 } // namespace decoder
-} // namespace gravia
+} // namespace polypnl

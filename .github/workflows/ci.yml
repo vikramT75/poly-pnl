@@ -27,11 +27,11 @@ jobs:
             export CC=clang CXX=clang++
           fi
           mkdir build && cd build
-          cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DGRAVIA_ENABLE_ASAN=ON -DGRAVIA_ENABLE_UBSAN=ON ..
+          cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DPOLY_ENABLE_ASAN=ON -DPOLY_ENABLE_UBSAN=ON ..
 
       - name: Build
         run: |
-          cd build && ninja gravia_tests gravia_engine_daemon
+          cd build && ninja poly_tests poly_engine_daemon
 
       - name: Run Tests with Sanitizers
         run: |

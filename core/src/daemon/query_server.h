@@ -6,7 +6,7 @@
 #include "engine.h"
 #include "intern_table.h"
 
-namespace gravia {
+namespace polypnl {
 namespace daemon {
 
 class QueryServer {
@@ -30,4 +30,4 @@ private:
 };
 
 } // namespace daemon
-} // namespace gravia
+} // namespace polypnl

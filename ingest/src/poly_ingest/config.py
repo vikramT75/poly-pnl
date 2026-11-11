@@ -27,7 +27,7 @@ class IngestConfig(BaseSettings):
     clickhouse_port: int = Field(default=8123, validation_alias="CLICKHOUSE_PORT")
     clickhouse_user: str = Field(default="default", validation_alias="CLICKHOUSE_USER")
     clickhouse_password: str = Field(default="", validation_alias="CLICKHOUSE_PASSWORD")
-    clickhouse_database: str = Field(default="gravia", validation_alias="CLICKHOUSE_DATABASE")
+    clickhouse_database: str = Field(default="polypnl", validation_alias="CLICKHOUSE_DATABASE")
 
     # Ingestion parameters
     backfill_days: int = Field(default=90, validation_alias="BACKFILL_DAYS")
@@ -38,7 +38,7 @@ class IngestConfig(BaseSettings):
     engine_host: str = Field(default="127.0.0.1", validation_alias="ENGINE_HOST")
     engine_port: int = Field(default=9999, validation_alias="ENGINE_PORT")
     engine_socket_path: str = Field(
-        default="/tmp/gravia_engine.sock",
+        default="/tmp/poly_engine.sock",
         validation_alias="ENGINE_SOCKET"
     )
 

@@ -17,7 +17,7 @@ Tracks implementation status across all phases according to the master plan.
 - [x] **Measured Throughput:** **3,396,849 events/sec** (294 ns/event).
 
 ## Phase 2: Ingestion Pipeline (Python 3.12+ Asyncio)
-- [x] Modular package layout (`pyproject.toml`, `gravia_ingest`).
+- [x] Modular package layout (`pyproject.toml`, `poly_ingest`).
 - [x] Envio HyperSync client for Polygon backfill.
 - [x] Polygon RPC WebSocket `eth_subscribe` logs live listener with fallback.
 - [x] 128-block reorg detection ring buffer and rollback emitter.

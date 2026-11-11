@@ -25,7 +25,7 @@
 // Source: docs/CONTRACTS_AND_APIS.md (Phase 0 verified)
 // ============================================================================
 
-namespace gravia {
+namespace polypnl {
 namespace decoder {
 
 // ---------------------------------------------------------------------------
@@ -265,4 +265,4 @@ private:
 };
 
 } // namespace decoder
-} // namespace gravia
+} // namespace polypnl

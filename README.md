@@ -1,6 +1,6 @@
-# gravia-pnl: Institutional-Grade Real-Time Polymarket PnL Engine
+# poly-pnl: High-Performance Real-Time Polymarket PnL Engine
 
-[![CI](https://github.com/gravia/pnl/actions/workflows/ci.yml/badge.svg)](https://github.com/gravia/pnl/actions/workflows/ci.yml)
+[![CI](https://github.com/poly-pnl/poly-pnl/actions/workflows/ci.yml/badge.svg)](https://github.com/poly-pnl/poly-pnl/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
@@ -124,8 +124,8 @@ Run the complete institutional stack (ClickHouse + Engine + Ingestor + API + Nex
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/gravia/pnl.git
-cd pnl
+git clone https://github.com/poly-pnl/poly-pnl.git
+cd poly-pnl
 
 # 2. Setup environment keys (optional; runs out-of-the-box on defaults)
 cp .env.example .env
@@ -138,7 +138,7 @@ docker compose -f infra/docker-compose.yml up --build -d
 - **Next.js Trading Terminal:** [http://localhost:3000](http://localhost:3000)
 - **FastAPI Documentation:** [http://localhost:8080/docs](http://localhost:8080/docs)
 - **Prometheus Metrics:** [http://localhost:9091](http://localhost:9091)
-- **Grafana Live Dashboard:** [http://localhost:3001](http://localhost:3001) *(login: admin / gravia)*
+- **Grafana Live Dashboard:** [http://localhost:3001](http://localhost:3001) *(login: admin / admin)*
 - **ClickHouse HTTP:** [http://localhost:8123](http://localhost:8123)
 
 ---

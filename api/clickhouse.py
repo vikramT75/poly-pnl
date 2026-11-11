@@ -7,7 +7,7 @@ class ClickHouseQueryService:
         self.port = int(os.getenv("CLICKHOUSE_PORT", "8123"))
         self.user = os.getenv("CLICKHOUSE_USER", "default")
         self.password = os.getenv("CLICKHOUSE_PASSWORD", "")
-        self.database = os.getenv("CLICKHOUSE_DATABASE", "gravia")
+        self.database = os.getenv("CLICKHOUSE_DATABASE", "polypnl")
         self.client = None
 
     def connect(self) -> None:

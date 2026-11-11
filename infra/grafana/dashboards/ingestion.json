@@ -14,7 +14,7 @@
       "title": "Blocks Behind Chain Head",
       "type": "stat",
       "targets": [
-        { "expr": "gravia_ingest_blocks_behind_head", "legendFormat": "Lag (blocks)" }
+        { "expr": "poly_ingest_blocks_behind_head", "legendFormat": "Lag (blocks)" }
       ]
     },
     {
@@ -24,7 +24,7 @@
       "title": "Latest Block Processed",
       "type": "stat",
       "targets": [
-        { "expr": "gravia_ingest_last_block_processed", "legendFormat": "Block" }
+        { "expr": "poly_ingest_last_block_processed", "legendFormat": "Block" }
       ]
     },
     {
@@ -34,7 +34,7 @@
       "title": "Reorgs Handled",
       "type": "stat",
       "targets": [
-        { "expr": "gravia_ingest_reorgs_total", "legendFormat": "Reorgs" }
+        { "expr": "poly_ingest_reorgs_total", "legendFormat": "Reorgs" }
       ]
     },
     {
@@ -44,7 +44,7 @@
       "title": "WebSocket Reconnects",
       "type": "stat",
       "targets": [
-        { "expr": "gravia_ingest_ws_reconnects_total", "legendFormat": "Reconnects" }
+        { "expr": "poly_ingest_ws_reconnects_total", "legendFormat": "Reconnects" }
       ]
     },
     {
@@ -54,7 +54,7 @@
       "title": "Event Ingestion Throughput (ev/s)",
       "type": "timeseries",
       "targets": [
-        { "expr": "rate(gravia_clickhouse_rows_written_total[1m])", "legendFormat": "{{table}}" }
+        { "expr": "rate(poly_clickhouse_rows_written_total[1m])", "legendFormat": "{{table}}" }
       ]
     },
     {
@@ -64,17 +64,17 @@
       "title": "Ingestion Queue Depth",
       "type": "timeseries",
       "targets": [
-        { "expr": "gravia_ingest_queue_depth", "legendFormat": "Queue Depth" }
+        { "expr": "poly_ingest_queue_depth", "legendFormat": "Queue Depth" }
       ]
     }
   ],
   "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["polymarket", "pnl", "gravia"],
+  "tags": ["polymarket", "pnl", "polypnl"],
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Gravia Polymarket Ingestion & Engine Metrics",
-  "uid": "gravia-ingestion"
+  "title": "Polymarket Ingestion & Engine Metrics",
+  "uid": "poly-ingestion"
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "gravia-pnl | Real-Time Polymarket PnL Terminal",
+  title: "poly-pnl | Real-Time Polymarket PnL Terminal",
   description: "High-performance institutional-grade PnL engine for Polymarket prediction markets",
 };
 
@@ -18,7 +18,7 @@ export default function RootLayout({
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-success animate-pulse" />
             <a href="/" className="font-bold text-lg tracking-wider text-white hover:text-accent transition-colors">
-              GRAVIA <span className="text-zinc-500 font-normal">| POLYMARKET PnL ENGINE</span>
+              POLYPNL <span className="text-zinc-500 font-normal">| POLYMARKET PnL ENGINE</span>
             </a>
           </div>
           <div className="flex items-center gap-6 text-xs text-zinc-400">

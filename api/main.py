@@ -8,7 +8,7 @@ from .client import EngineClient
 from .clickhouse import ClickHouseQueryService
 
 app = FastAPI(
-    title="gravia-pnl API",
+    title="poly-pnl API",
     description="Real-Time Polymarket PnL Engine REST & WebSocket API",
     version="0.1.0"
 )

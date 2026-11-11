@@ -7,7 +7,7 @@ from .pipeline import IngestionPipeline
 
 def main() -> None:
     print("========================================================")
-    print("      gravia-ingest: Real-time Polymarket Ingestion     ")
+    print("      poly-ingest: Real-time Polymarket Ingestion     ")
     print("========================================================")
 
     config = IngestConfig()

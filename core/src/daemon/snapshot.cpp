@@ -8,10 +8,10 @@
 
 namespace fs = std::filesystem;
 
-namespace gravia {
+namespace polypnl {
 namespace daemon {
 
-static constexpr uint32_t SNAPSHOT_MAGIC = 0x47525641; // "GRVA"
+static constexpr uint32_t SNAPSHOT_MAGIC = 0x504F4C59; // "POLY"
 static constexpr uint32_t SNAPSHOT_VERSION = 1;
 
 bool SnapshotManager::save_snapshot(const engine::PnLEngine& engine, uint64_t block_number, const std::string& filename) {
@@ -124,4 +124,4 @@ bool SnapshotManager::load_latest_snapshot(engine::PnLEngine& engine, uint64_t& 
 }
 
 } // namespace daemon
-} // namespace gravia
+} // namespace polypnl

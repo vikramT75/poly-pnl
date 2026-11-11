@@ -1,10 +1,10 @@
--- ClickHouse Schema for gravia-pnl
+-- ClickHouse Schema for poly-pnl
 -- All tables use ReplacingMergeTree for automatic idempotency during replay
 
-CREATE DATABASE IF NOT EXISTS gravia;
+CREATE DATABASE IF NOT EXISTS polypnl;
 
 -- 1. Raw Logs: Ingested on-chain logs from Polygon
-CREATE TABLE IF NOT EXISTS gravia.raw_logs
+CREATE TABLE IF NOT EXISTS polypnl.raw_logs
 (
     block_number    UInt64,
     tx_hash         FixedString(66),
@@ -26,7 +26,7 @@ ORDER BY (block_number, log_index)
 SETTINGS index_granularity = 8192;
 
 -- 2. Normalized Events: Output of C++ Decoder
-CREATE TABLE IF NOT EXISTS gravia.events
+CREATE TABLE IF NOT EXISTS polypnl.events
 (
     block_number    UInt64,
     log_index       UInt32,
@@ -50,7 +50,7 @@ ORDER BY (wallet, block_number, log_index)
 SETTINGS index_granularity = 8192;
 
 -- 3. Block Hashes: Used for reorg detection and fork points
-CREATE TABLE IF NOT EXISTS gravia.block_hashes
+CREATE TABLE IF NOT EXISTS polypnl.block_hashes
 (
     block_number    UInt64,
     block_hash      FixedString(66),
@@ -62,7 +62,7 @@ ENGINE = ReplacingMergeTree(_version)
 ORDER BY block_number;
 
 -- 4. Market Metadata from Gamma API
-CREATE TABLE IF NOT EXISTS gravia.markets
+CREATE TABLE IF NOT EXISTS polypnl.markets
 (
     condition_id    FixedString(66),
     question        String,
@@ -78,7 +78,7 @@ ENGINE = ReplacingMergeTree(_version)
 ORDER BY condition_id;
 
 -- 5. PnL Snapshots: Daily/Hourly aggregates for PnL curves
-CREATE TABLE IF NOT EXISTS gravia.pnl_snapshots
+CREATE TABLE IF NOT EXISTS polypnl.pnl_snapshots
 (
     wallet          FixedString(42),
     snapshot_time   DateTime,

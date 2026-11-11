@@ -8,8 +8,8 @@ COPY CMakeLists.txt .
 COPY core/ core/
 
 RUN mkdir build && cd build && \
-    cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DGRAVIA_NATIVE_MARCH=OFF .. && \
-    ninja gravia_engine_daemon
+    cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPOLY_NATIVE_MARCH=OFF .. && \
+    ninja poly_engine_daemon
 
 FROM debian:bookworm-slim
 
@@ -17,8 +17,8 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y libstdc++6 && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /build/build/gravia_engine_daemon /app/gravia_engine_daemon
+COPY --from=builder /build/build/poly_engine_daemon /app/poly_engine_daemon
 
 EXPOSE 9998 9999
 
-CMD ["/app/gravia_engine_daemon"]
+CMD ["/app/poly_engine_daemon"]

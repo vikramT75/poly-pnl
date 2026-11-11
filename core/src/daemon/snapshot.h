@@ -4,12 +4,12 @@
 #include <string>
 #include "engine.h"
 
-namespace gravia {
+namespace polypnl {
 namespace daemon {
 
 #pragma pack(push, 1)
 struct SnapshotHeader {
-    uint32_t magic;          // 0x47525641 ("GRVA")
+    uint32_t magic;          // 0x504F4C59 ("POLY")
     uint32_t version;        // 1
     uint64_t block_number;   // Polygon block number at snapshot
     uint64_t timestamp_s;    // Timestamp of snapshot
@@ -47,4 +47,4 @@ private:
 };
 
 } // namespace daemon
-} // namespace gravia
+} // namespace polypnl
