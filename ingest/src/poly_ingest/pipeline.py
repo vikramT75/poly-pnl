@@ -131,12 +131,12 @@ class IngestionPipeline:
             if m.no_token_id:  tokens.append(m.no_token_id)
         self.clob_ws.add_tokens(tokens)
 
-        # 4. If checkpoint is 0, backfill recent blocks for immediate live state
-        if last_block == 0:
-            current_head = await self.fetch_current_head()
+        # 4. If checkpoint is 0 or obsolete, sync to recent head
+        current_head = await self.fetch_current_head()
+        if last_block == 0 or (current_head - last_block > 5000):
             start_block = max(1, current_head - 100)
             target_block = current_head
-            print(f"[Pipeline] Loading recent on-chain history: blocks {start_block} to {target_block} (head={current_head})...")
+            print(f"[Pipeline] Syncing to live chain tip: loading blocks {start_block} to {target_block} (head={current_head})...")
 
             total_events = 0
             t0 = time.time()
