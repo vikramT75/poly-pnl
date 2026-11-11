@@ -1,15 +1,17 @@
 # poly-pnl: High-Performance Real-Time Polymarket PnL Engine
 
-[![CI](https://github.com/poly-pnl/poly-pnl/actions/workflows/ci.yml/badge.svg)](https://github.com/poly-pnl/poly-pnl/actions/workflows/ci.yml)
+[![CI](https://github.com/vikramT75/poly-pnl/actions/workflows/ci.yml/badge.svg)](https://github.com/vikramT75/poly-pnl/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/)
 
 **A high-performance, real-time Profit and Loss (PnL) engine for 2M+ Polymarket prediction market traders on Polygon.** Ingests on-chain trading logs in backfill and live streaming modes, computes incremental position cost basis and mark-to-market valuations without recomputation, self-heals across blockchain reorgs, and serves sub-100 microsecond leaderboard queries via REST and WebSockets.
 
+![Polymarket Prediction Market Trading Terminal](docs/images/terminal_preview.png)
+
 ---
 
-## ⚡ Headline Performance & Validation Numbers
+## Headline Performance & Validation Numbers
 
 Measured on AMD Ryzen / Intel x86-64 hardware compiled with GCC 16.2 (`-O3 -march=native`):
 
@@ -26,7 +28,7 @@ Measured on AMD Ryzen / Intel x86-64 hardware compiled with GCC 16.2 (`-O3 -marc
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 Polygon RPC (WS) / Envio HyperSync
@@ -57,12 +59,12 @@ Polygon RPC (WS) / Envio HyperSync
 
 ---
 
-## 🧮 Accounting Model & Edge Cases
+## Accounting Model & Edge Cases
 
 The engine employs an **incremental Average Cost Basis (ACB)** model with fixed-point arithmetic ($10^{-6}$ scale), matching Polymarket's on-chain settlement and official Data API:
 
 - **BUY:**
-  $$\text{new\_avg} = \frac{\text{size} \times \text{avg} + \text{qty} \times \text{price}}{\text{size} + \text{qty}}, \quad \text{size} \mathrel{+}= \text{qty}, \quad \text{realized} \mathrel{-}= \text{fee}$$
+  $$\text{Avg}_{\text{new}} = \frac{\text{size} \times \text{avg} + \text{qty} \times \text{price}}{\text{size} + \text{qty}}, \quad \text{size} \mathrel{+}= \text{qty}, \quad \text{realized} \mathrel{-}= \text{fee}$$
   *Numerator is evaluated in `__int128` to prevent 64-bit integer overflow during multi-million share multiplications.*
 - **SELL:**
   $$\text{realized} \mathrel{+}= \frac{\text{qty} \times (\text{price} - \text{avg})}{10^6} - \text{fee}, \quad \text{size} \mathrel{-}= \text{qty}$$
@@ -77,7 +79,7 @@ See [`docs/ACCOUNTING_MODEL.md`](docs/ACCOUNTING_MODEL.md) and [`docs/EDGE_CASES
 
 ---
 
-## 💡 Hardest Problem Solved: Reorg-Safe Incremental PnL with Sub-Millisecond Mark Distribution
+## Hardest Problem Solved: Reorg-Safe Incremental PnL with Sub-Millisecond Mark Distribution
 
 ### The Problem
 Polygon PoS produces frequent, shallow reorgs (1–5 blocks depth). In a naïve PnL engine, when a 3-block reorg occurs, reverting the state requires either:
@@ -96,12 +98,12 @@ Simultaneously, live CLOB price marks fluctuate multiple times per second across
    The C++ engine records the *pre-event inverse delta* of each position touched within the block window. When a reorg fork point is detected by the Python ingestor (`ReorgTracker`), a compact `ROLLBACK <block>` frame is dispatched. The engine applies the reverse deltas in backwards order, restoring **byte-identical state** in under **12 microseconds**.
 2. **Inverted `TokenHolderIndex` & Coalesced Deltas:**
    The engine maintains an inverted index of only wallets actively holding non-zero shares for a given token. When a mark changes by $\Delta \text{mark}$, the engine updates only actual holders:
-   $$\text{running\_unrealized} \mathrel{+}= \frac{\text{size} \times \Delta \text{mark}}{10^6}$$
+   $$\Delta \text{Unrealized} = \frac{\text{size} \times \Delta \text{mark}}{10^6}$$
    Incoming ticks are coalesced in 50 ms windows, shrinking CPU consumption during high-volatility spikes by **99.4%**.
 
 ---
 
-## ⚖️ Design Decisions & Trade-Offs
+## Design Decisions & Trade-Offs
 
 Detailed in [`docs/DECISIONS.md`](docs/DECISIONS.md):
 - **C++20 Hot Path vs Pure Python:** CPU-bound ABI decoding and position updates run in compiled C++20 with zero heap allocation, bypassing the Python GIL.
@@ -111,20 +113,20 @@ Detailed in [`docs/DECISIONS.md`](docs/DECISIONS.md):
 
 ---
 
-## 🔍 Validation & Limitations
+## Validation & Limitations
 
 - **Validation:** Golden test suite across 50 diverse wallets against Polymarket Data API achieves **96.6% core match rate** (88.2% exact, 8.4% within cent-level rounding). Fully documented in [`docs/VALIDATION.md`](docs/VALIDATION.md).
 - **Limitations:** Documented honestly in [`docs/LIMITATIONS.md`](docs/LIMITATIONS.md) (e.g. 90-day bounded backfill window, proxy Gnosis Safe attribution, NegRisk split approximations).
 
 ---
 
-## 🚀 One-Command Local Deployment
+## One-Command Local Deployment
 
 Run the complete institutional stack (ClickHouse + Engine + Ingestor + API + Next.js + Prometheus + Grafana) with one command:
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/poly-pnl/poly-pnl.git
+git clone https://github.com/vikramT75/poly-pnl.git
 cd poly-pnl
 
 # 2. Setup environment keys (optional; runs out-of-the-box on defaults)
@@ -143,7 +145,7 @@ docker compose -f infra/docker-compose.yml up --build -d
 
 ---
 
-## 🧪 Reproducing Benchmarks & Tests
+## Reproducing Benchmarks & Tests
 
 ```bash
 # 1. Run C++ Microbenchmarks
