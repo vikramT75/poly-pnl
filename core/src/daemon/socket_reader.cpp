@@ -13,6 +13,8 @@
 #else
   #include <sys/socket.h>
   #include <sys/un.h>
+  #include <netinet/in.h>
+  #include <arpa/inet.h>
   #include <unistd.h>
   #include <fcntl.h>
   using socket_t = int;
@@ -67,7 +69,7 @@ void SocketReader::run() {
     // Listen on localhost port 9999 or unix domain socket
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port = htons(9999);
 
     if (bind(server_fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) != 0) {

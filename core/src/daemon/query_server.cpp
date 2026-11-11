@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <iomanip>
+#include <cstdlib>
 
 #ifdef _WIN32
   #include <winsock2.h>
@@ -154,15 +155,20 @@ void QueryServer::run() {
         } else if (cmd == "WALLET") {
             std::string addr_hex;
             iss >> addr_hex;
-            uint32_t w_idx = 0;
+            uint32_t w_idx = 0xFFFFFFFF;
             if (addr_hex.rfind("0x", 0) == 0 && addr_hex.length() == 42) {
                 uint8_t raw[20];
                 for (int i = 0; i < 20; ++i) {
-                    raw[i] = static_cast<uint8_t>(std::stoi(addr_hex.substr(2 + i * 2, 2), nullptr, 16));
+                    std::string byte_str = addr_hex.substr(2 + i * 2, 2);
+                    raw[i] = static_cast<uint8_t>(std::strtoul(byte_str.c_str(), nullptr, 16));
                 }
                 w_idx = wallet_table_.find(raw);
-            } else {
-                try { w_idx = std::stoul(addr_hex); } catch (...) { w_idx = 0xFFFFFFFF; }
+            } else if (!addr_hex.empty()) {
+                char* end = nullptr;
+                unsigned long val = std::strtoul(addr_hex.c_str(), &end, 10);
+                if (end != addr_hex.c_str()) {
+                    w_idx = static_cast<uint32_t>(val);
+                }
             }
 
             if (w_idx != 0xFFFFFFFF) {

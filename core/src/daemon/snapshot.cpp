@@ -4,6 +4,7 @@
 #include <chrono>
 #include <filesystem>
 #include <iostream>
+#include <cstdlib>
 
 namespace fs = std::filesystem;
 
@@ -94,14 +95,13 @@ bool SnapshotManager::load_latest_snapshot(engine::PnLEngine& engine, uint64_t& 
     for (const auto& entry : fs::directory_iterator(snapshot_dir_)) {
         if (entry.path().extension() == ".bin") {
             std::string stem = entry.path().stem().string();
-            if (stem.rfind("snapshot_", 0) == 0) {
-                try {
-                    uint64_t b = std::stoull(stem.substr(9));
-                    if (b >= max_block) {
-                        max_block = b;
-                        latest_file = entry.path().string();
-                    }
-                } catch (...) {}
+            if (stem.rfind("snapshot_", 0) == 0 && stem.length() > 9) {
+                char* end = nullptr;
+                uint64_t b = std::strtoull(stem.c_str() + 9, &end, 10);
+                if (end != stem.c_str() + 9 && b >= max_block) {
+                    max_block = b;
+                    latest_file = entry.path().string();
+                }
             }
         }
     }

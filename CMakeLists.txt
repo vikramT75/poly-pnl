@@ -22,8 +22,9 @@ option(GRAVIA_NATIVE_MARCH   "Use -march=native (for benchmarks)" OFF)
 add_library(gravia_compile_options INTERFACE)
 
 target_compile_options(gravia_compile_options INTERFACE
-    -Wall -Wextra -Wpedantic
+    -Wall -Wextra
     -Wno-unused-parameter
+    -Wno-pedantic
     -fno-exceptions
     -fno-rtti
     $<$<CONFIG:Release>:-O3>

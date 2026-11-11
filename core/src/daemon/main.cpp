@@ -25,17 +25,6 @@ void signal_handler(int sig) {
     g_shutdown = true;
 }
 
-// C-compatible callbacks for the decoder's InternTables struct
-static WalletIdx intern_wallet_cb(const uint8_t addr[20], void* ctx) noexcept {
-    auto* table = static_cast<WalletInternTable*>(ctx);
-    return table->intern(addr);
-}
-
-static TokenIdx intern_token_cb(const uint8_t token_id[32], void* ctx) noexcept {
-    auto* table = static_cast<TokenInternTable*>(ctx);
-    return table->intern(token_id);
-}
-
 int main(int argc, char** argv) {
 #ifdef _WIN32
     WSADATA wsa;
