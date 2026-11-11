@@ -1,6 +1,7 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List, Dict, Set, Literal
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 import asyncio
 import os
 
@@ -70,6 +71,11 @@ async def startup_event():
                 except Exception:
                     pass
     asyncio.create_task(push_loop())
+
+@app.get("/metrics")
+def get_metrics():
+    """Prometheus metrics endpoint."""
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 @app.get("/health")
 def health():

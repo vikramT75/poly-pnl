@@ -76,6 +76,9 @@ add_executable(poly_engine_daemon
 )
 
 target_link_libraries(poly_engine_daemon PRIVATE poly_core pthread)
+if(NOT MSVC)
+    target_link_options(poly_engine_daemon PRIVATE -static-libstdc++ -static-libgcc)
+endif()
 
 # ---------------------------------------------------------------------------
 # Tests (via GoogleTest)
