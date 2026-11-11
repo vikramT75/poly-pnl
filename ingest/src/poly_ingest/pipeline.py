@@ -102,22 +102,25 @@ class IngestionPipeline:
         await self._run_live_logs()
 
     async def _run_live_logs(self) -> None:
+        last_block_number = -1
         async for log_item in self.live_sub.subscribe_logs():
             if not self.running:
                 break
 
-            # Check reorg
-            block_hdr = BlockHeader(
-                number=log_item.block_number,
-                block_hash="",
-                parent_hash=""
-            )
-            rolled_back = self.reorg_tracker.add_block(block_hdr)
-            if rolled_back:
-                min_rollback = min(rolled_back)
-                REORGS_TOTAL.inc()
-                print(f"[Pipeline] Reorg detected! Rolling back engine to block {min_rollback}")
-                await self.emitter.emit_rollback(min_rollback)
+            # Check reorg only when advancing or changing block height
+            if log_item.block_number != last_block_number:
+                block_hdr = BlockHeader(
+                    number=log_item.block_number,
+                    block_hash=log_item.block_hash,
+                    parent_hash=""
+                )
+                rolled_back = self.reorg_tracker.add_block(block_hdr)
+                if rolled_back:
+                    min_rollback = min(rolled_back)
+                    REORGS_TOTAL.inc()
+                    print(f"[Pipeline] Reorg detected! Rolling back engine to block {min_rollback}")
+                    await self.emitter.emit_rollback(min_rollback)
+                last_block_number = log_item.block_number
 
             # Persist and emit
             self.clickhouse.write_raw_logs([log_item])

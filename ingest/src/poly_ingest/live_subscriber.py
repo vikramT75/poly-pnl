@@ -53,6 +53,7 @@ class LiveSubscriber:
                         b_num = int(result.get("blockNumber", "0x0"), 16)
                         l_idx = int(result.get("logIndex", "0x0"), 16)
                         t_idx = int(result.get("transactionIndex", "0x0"), 16)
+                        b_hash = result.get("blockHash", "")
 
                         yield RawLogItem(
                             block_number=b_num,
@@ -61,7 +62,8 @@ class LiveSubscriber:
                             tx_index=t_idx,
                             address=addr,
                             topics=topics,
-                            data=raw_data
+                            data=raw_data,
+                            block_hash=b_hash
                         )
             except Exception as e:
                 ERROR_RATE.labels(type="ws_live").inc()

@@ -13,6 +13,7 @@ class RawLogItem:
     address: bytes       # 20 bytes
     topics: List[bytes]  # up to 4 topics, each 32 bytes
     data: bytes          # variable length ABI data
+    block_hash: str = ""
 
 RAWLOG_STRUCT = struct.Struct("<QQII20s128sB3sI1024s4s")
 assert RAWLOG_STRUCT.size == 1208, f"Expected 1208 bytes, got {RAWLOG_STRUCT.size}"
