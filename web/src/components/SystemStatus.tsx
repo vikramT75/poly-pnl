@@ -76,7 +76,7 @@ export function SystemStatus() {
       <div className="flex flex-col">
         <span className="text-zinc-500 text-xs">THROUGHPUT HEADROOM</span>
         <span className="font-semibold text-sm mt-1 text-success">
-          3.4M ev/s (C++20)
+          3.4M ev/s
         </span>
       </div>
     </div>

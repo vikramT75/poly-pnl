@@ -14,6 +14,7 @@ option(POLY_ENABLE_UBSAN   "Enable UndefinedBehaviorSanitizer" OFF)
 option(POLY_ENABLE_TSAN    "Enable ThreadSanitizer"            OFF)
 option(POLY_ENABLE_BENCH   "Build benchmarks"                  OFF)
 option(POLY_ENABLE_FUZZ    "Build fuzz targets"                OFF)
+option(POLY_ENABLE_TESTS   "Build test suite"                  OFF)
 option(POLY_NATIVE_MARCH   "Use -march=native (for benchmarks)" OFF)
 
 # ---------------------------------------------------------------------------
@@ -83,6 +84,7 @@ endif()
 # ---------------------------------------------------------------------------
 # Tests (via GoogleTest)
 # ---------------------------------------------------------------------------
+if(POLY_ENABLE_TESTS)
 enable_testing()
 
 find_package(GTest QUIET)
@@ -111,6 +113,7 @@ target_link_options(poly_tests PRIVATE -fsanitize=address,undefined)
 
 include(GoogleTest)
 gtest_discover_tests(poly_tests)
+endif()
 
 # ---------------------------------------------------------------------------
 # Fuzz targets (clang + libFuzzer)

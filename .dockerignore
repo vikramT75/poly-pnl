@@ -1,0 +1,10 @@
+node_modules
+web/node_modules
+.next
+web/.next
+.git
+build
+.venv
+__pycache__
+.mypy_cache
+.ruff_cache
