@@ -8,7 +8,7 @@ COPY CMakeLists.txt .
 COPY core/ core/
 
 RUN mkdir build && cd build && \
-    cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPOLY_NATIVE_MARCH=OFF .. && \
+    cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPOLY_NATIVE_MARCH=OFF -DPOLY_ENABLE_TESTS=OFF .. && \
     ninja poly_engine_daemon
 
 FROM debian:bookworm-slim

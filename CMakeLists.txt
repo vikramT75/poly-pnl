@@ -14,7 +14,11 @@ option(POLY_ENABLE_UBSAN   "Enable UndefinedBehaviorSanitizer" OFF)
 option(POLY_ENABLE_TSAN    "Enable ThreadSanitizer"            OFF)
 option(POLY_ENABLE_BENCH   "Build benchmarks"                  OFF)
 option(POLY_ENABLE_FUZZ    "Build fuzz targets"                OFF)
-option(POLY_ENABLE_TESTS   "Build test suite"                  OFF)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/decoder_test.cpp")
+    option(POLY_ENABLE_TESTS   "Build test suite"                  ON)
+else()
+    option(POLY_ENABLE_TESTS   "Build test suite"                  OFF)
+endif()
 option(POLY_NATIVE_MARCH   "Use -march=native (for benchmarks)" OFF)
 
 # ---------------------------------------------------------------------------
