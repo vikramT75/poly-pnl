@@ -28,7 +28,7 @@ class GammaMetadataWorker:
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(url, timeout=10) as resp:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                     if resp.status == 200:
                         data = await resp.json()
                         for item in data:

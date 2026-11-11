@@ -63,7 +63,9 @@ class HyperSyncSource:
 
                 chunk_to = int(str(payload["to_block"]))
                 try:
-                    async with session.post(f"{self.url}/query", json=payload, timeout=30) as resp:
+                    async with session.post(
+                        f"{self.url}/query", json=payload, timeout=aiohttp.ClientTimeout(total=30)
+                    ) as resp:
                         if resp.status == 200:
                             data = await resp.json()
                             logs_raw = data.get("data", {}).get("logs", [])

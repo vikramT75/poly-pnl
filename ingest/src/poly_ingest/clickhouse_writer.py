@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 from .emitter import RawLogItem
 from .metrics import CLICKHOUSE_ROWS_WRITTEN, CLICKHOUSE_WRITE_ERRORS
@@ -19,7 +20,7 @@ class ClickHouseWriter:
         self.user = user
         self.password = password
         self.database = database
-        self.client = None
+        self.client: Any = None
 
     def connect(self) -> None:
         try:
