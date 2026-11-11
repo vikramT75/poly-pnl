@@ -264,6 +264,8 @@ void PnLEngine::apply_buy(PositionKey key, int64_t qty, int64_t price, int32_t f
     if (pos->size == 0)
         holder_index_.add_holder(key.token_idx, key.wallet_idx);
 
+    int64_t old_unrealized = pos->running_unrealized;
+
     // Average cost basis update
     // new_avg = (old_size * old_avg + qty * price) / (old_size + qty)
     // Use __int128 to avoid overflow (see ACCOUNTING_MODEL.md section 4)
@@ -276,9 +278,19 @@ void PnLEngine::apply_buy(PositionKey key, int64_t qty, int64_t price, int32_t f
     pos->realized_pnl -= fee;
     wallet_totals_[key.wallet_idx].realized_pnl -= fee;
 
-    // Update running unrealized: add qty * (mark - price) / 1e6
+    // Mark price: if not yet set, trade price is current mark
+    if (marks_[key.token_idx] == 0 && price > 0) {
+        marks_[key.token_idx] = price;
+    }
+
+    // Update running unrealized: size * (mark - avg_price) / 1e6
     int64_t mark = current_mark(key.token_idx);
-    pos->running_unrealized += (__int128)qty * (mark - price) / 1'000'000LL;
+    int64_t new_unrealized = 0;
+    if (pos->size > 0 && mark > 0) {
+        new_unrealized = static_cast<int64_t>((__int128)pos->size * (mark - pos->avg_price) / 1'000'000LL);
+    }
+    pos->running_unrealized = new_unrealized;
+    wallet_totals_[key.wallet_idx].unrealized_pnl += (new_unrealized - old_unrealized);
 
     // Update wallet volume
     wallet_totals_[key.wallet_idx].volume += (__int128)qty * price / 1'000'000LL;
@@ -312,23 +324,43 @@ void PnLEngine::apply_sell(PositionKey key, int64_t qty, int64_t price, int32_t 
 
     if (actual_qty <= 0) return;
 
+    int64_t old_unrealized = pos->running_unrealized;
+
     // Realize PnL: qty * (price - avg_price) / 1e6 (already in 1e6 scale)
     int64_t gain = static_cast<int64_t>((__int128)actual_qty * (price - pos->avg_price) / 1'000'000LL);
-    pos->realized_pnl += gain;
-    pos->realized_pnl -= fee;
+    pos->realized_pnl += (gain - fee);
     wallet_totals_[key.wallet_idx].realized_pnl += (gain - fee);
 
-    // Update unrealized
-    pos->running_unrealized -= static_cast<int64_t>((__int128)actual_qty * (current_mark(key.token_idx) - pos->avg_price) / 1'000'000LL);
+    // Mark price: if not yet set, trade price is current mark
+    if (marks_[key.token_idx] == 0 && price > 0) {
+        marks_[key.token_idx] = price;
+    }
 
     // Reduce size
     pos->size -= actual_qty;
+    int64_t new_unrealized = 0;
     if (pos->size == 0) {
+        // Trade closed: record win/loss statistics
+        if (pos->realized_pnl > 0) {
+            ++wallet_totals_[key.wallet_idx].winning_markets;
+        } else if (pos->realized_pnl < 0) {
+            ++wallet_totals_[key.wallet_idx].losing_markets;
+        }
+
         pos->avg_price = 0;
-        pos->running_unrealized = 0;
+        new_unrealized = 0;
         holder_index_.remove_holder(key.token_idx, key.wallet_idx);
-        --wallet_totals_[key.wallet_idx].position_count;
+        if (wallet_totals_[key.wallet_idx].position_count > 0)
+            --wallet_totals_[key.wallet_idx].position_count;
+    } else {
+        int64_t mark = current_mark(key.token_idx);
+        if (mark > 0) {
+            new_unrealized = static_cast<int64_t>((__int128)pos->size * (mark - pos->avg_price) / 1'000'000LL);
+        }
     }
+
+    pos->running_unrealized = new_unrealized;
+    wallet_totals_[key.wallet_idx].unrealized_pnl += (new_unrealized - old_unrealized);
 
     // Volume
     wallet_totals_[key.wallet_idx].volume += (__int128)actual_qty * price / 1'000'000LL;
@@ -342,6 +374,10 @@ void PnLEngine::apply_sell(PositionKey key, int64_t qty, int64_t price, int32_t 
 
 void PnLEngine::handle_fill(const NormalizedEvent& ev) noexcept {
     PositionKey key{ev.wallet_idx, ev.token_idx};
+    // Mark-to-market all current holders of this token to the trade execution price
+    if (ev.price > 0 && ev.price <= 1'000'000) {
+        update_mark(ev.token_idx, ev.price);
+    }
     if (ev.side == FillSide::BUY)
         apply_buy(key, ev.qty, ev.price, ev.fee, ev.block_number, false);
     else
@@ -386,13 +422,6 @@ void PnLEngine::handle_redeem(const NormalizedEvent& ev) noexcept {
     int32_t payout = ev.payout_price;
     apply_sell(key, redeem_qty, payout, 0, ev.block_number, false);
     if (pos) pos->is_resolved = true;
-
-    // Update win rate
-    ensure_wallet_totals(ev.wallet_idx);
-    if (pos && pos->realized_pnl > 0)
-        ++wallet_totals_[ev.wallet_idx].winning_markets;
-    else if (pos && pos->realized_pnl < 0)
-        ++wallet_totals_[ev.wallet_idx].losing_markets;
 }
 
 void PnLEngine::handle_transfer_in(const NormalizedEvent& ev) noexcept {
@@ -414,8 +443,6 @@ void PnLEngine::handle_transfer_out(const NormalizedEvent& ev) noexcept {
 
 void PnLEngine::handle_resolution(const NormalizedEvent& ev) noexcept {
     // Market resolved: synthetic REDEEM for all holders (EC-003)
-    // token_idx here = conditionId group; engine must iterate all tokens in that market
-    // Simplified: apply_sell at payout_price for this token's position
     PositionKey key{ev.wallet_idx, ev.token_idx};
     Position* pos = positions_.find(key);
     if (!pos || pos->size == 0 || pos->is_resolved) return;
@@ -426,39 +453,49 @@ void PnLEngine::handle_resolution(const NormalizedEvent& ev) noexcept {
 }
 
 // ---------------------------------------------------------------------------
-// Mark updates — batched for efficiency
+// Mark updates — applied in real time to all holders
 // ---------------------------------------------------------------------------
 
 void PnLEngine::update_mark(TokenIdx token_idx, int64_t new_mark_price) noexcept {
-    pending_marks_.push_back({token_idx, new_mark_price});
-    // Flush automatically when batch size exceeds threshold
-    if (pending_marks_.size() >= 1000)
-        flush_marks();
+    if (token_idx == INVALID_TOKEN || new_mark_price <= 0) return;
+    ensure_marks(token_idx);
+    int64_t old_mark = marks_[token_idx];
+    if (old_mark == new_mark_price) return;
+
+    marks_[token_idx] = new_mark_price;
+    if (old_mark == 0) {
+        // First mark set for this token; mark-to-market any existing open positions
+        if (token_idx < holder_index_.holders_.size()) {
+            for (WalletIdx w : holder_index_.holders_[token_idx]) {
+                PositionKey key{w, token_idx};
+                Position* pos = positions_.find(key);
+                if (!pos || pos->size == 0) continue;
+                int64_t old_unrealized = pos->running_unrealized;
+                pos->running_unrealized = static_cast<int64_t>(
+                    (__int128)pos->size * (new_mark_price - pos->avg_price) / 1'000'000LL);
+                ensure_wallet_totals(w);
+                wallet_totals_[w].unrealized_pnl += (pos->running_unrealized - old_unrealized);
+            }
+        }
+        return;
+    }
+
+    int64_t delta = new_mark_price - old_mark;
+    if (token_idx < holder_index_.holders_.size()) {
+        for (WalletIdx w : holder_index_.holders_[token_idx]) {
+            PositionKey key{w, token_idx};
+            Position* pos = positions_.find(key);
+            if (!pos || pos->size == 0) continue;
+            int64_t delta_unrealized = static_cast<int64_t>(
+                (__int128)pos->size * delta / 1'000'000LL);
+            pos->running_unrealized += delta_unrealized;
+            ensure_wallet_totals(w);
+            wallet_totals_[w].unrealized_pnl += delta_unrealized;
+        }
+    }
 }
 
 void PnLEngine::flush_marks() noexcept {
-    for (auto& pm : pending_marks_) {
-        ensure_marks(pm.token_idx);
-        int64_t old_mark = marks_[pm.token_idx];
-        int64_t delta    = pm.new_price - old_mark;
-        marks_[pm.token_idx] = pm.new_price;
-
-        if (delta == 0) continue;
-
-        // Apply delta to all holders' running_unrealized
-        // For each holder: running_unrealized += size * delta / 1e6
-        if (pm.token_idx < holder_index_.holders_.size()) {
-            for (WalletIdx w : holder_index_.holders_[pm.token_idx]) {
-                PositionKey key{w, pm.token_idx};
-                Position* pos = positions_.find(key);
-                if (!pos || pos->size == 0) continue;
-                pos->running_unrealized += static_cast<int64_t>(
-                    (__int128)pos->size * delta / 1'000'000LL);
-                ensure_wallet_totals(w);
-                wallet_totals_[w].unrealized_pnl = pos->running_unrealized; // approx
-            }
-        }
-    }
     pending_marks_.clear();
 }
 
@@ -481,6 +518,11 @@ void PnLEngine::rollback(uint64_t rollback_from_block) {
             holder_index_.add_holder(d.key.token_idx, d.key.wallet_idx);
         else if (!was_nonzero && is_nonzero)
             holder_index_.remove_holder(d.key.token_idx, d.key.wallet_idx);
+
+        ensure_wallet_totals(d.key.wallet_idx);
+        wallet_totals_[d.key.wallet_idx].realized_pnl += (d.before.realized_pnl - pos->realized_pnl);
+        wallet_totals_[d.key.wallet_idx].unrealized_pnl += (d.before.running_unrealized - pos->running_unrealized);
+
         *pos = d.before;
     }
 
@@ -518,7 +560,7 @@ std::vector<LeaderboardEntry> PnLEngine::get_leaderboard(int k) const {
 
     for (size_t i = 0; i < wallet_totals_.size(); ++i) {
         const auto& t = wallet_totals_[i];
-        if (t.realized_pnl == 0 && t.unrealized_pnl == 0) continue;
+        if (t.realized_pnl == 0 && t.unrealized_pnl == 0 && t.volume == 0) continue;
         LeaderboardEntry e{};
         e.wallet_idx    = static_cast<WalletIdx>(i);
         e.realized_pnl  = t.realized_pnl;

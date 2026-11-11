@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     }
 
     // 5. Start Ingestor Socket Reader (port 9999)
-    daemon::SocketReader socket_reader("/tmp/poly_engine.sock", log_decoder, pnl_engine);
+    daemon::SocketReader socket_reader("/tmp/poly_engine.sock", log_decoder, pnl_engine, token_table);
     socket_reader.start();
 
     // 6. Start Query API Server (port 9998)

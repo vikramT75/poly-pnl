@@ -198,3 +198,40 @@ TEST_F(EngineTest, ResolutionSyntheticRedeem) {
     // Realized = 10 * (1.00 - 0.60) = $4.00 = 4_000_000
     EXPECT_EQ(pos->realized_pnl, 4'000'000);
 }
+
+// 9. Multiple Positions Unrealized Accumulation
+TEST_F(EngineTest, MultiplePositionsUnrealizedAccumulation) {
+    // Buy T1: 100 shares @ $0.50
+    engine.process_event(make_fill(W1, T1, FillSide::BUY, 100'000'000, 500'000, 0, 100));
+    // Buy T2: 200 shares @ $0.40
+    engine.process_event(make_fill(W1, T2, FillSide::BUY, 200'000'000, 400'000, 0, 101));
+
+    // Update mark T1 to $0.70 (+$0.20 * 100 = +$20.00 = 20_000_000)
+    engine.update_mark(T1, 700'000);
+    // Update mark T2 to $0.50 (+$0.10 * 200 = +$20.00 = 20_000_000)
+    engine.update_mark(T2, 500'000);
+
+    auto summary = engine.get_wallet_summary(W1);
+    EXPECT_EQ(summary.unrealized_pnl, 40'000'000);
+    EXPECT_EQ(summary.total_pnl, 40'000'000);
+}
+
+// 10. Win Rate and Leaderboard on Sell Close
+TEST_F(EngineTest, WinRateAndLeaderboardOnSellClose) {
+    // Buy and sell T1 with profit
+    engine.process_event(make_fill(W1, T1, FillSide::BUY, 10'000'000, 500'000, 0, 100));
+    engine.process_event(make_fill(W1, T1, FillSide::SELL, 10'000'000, 800'000, 0, 101));
+
+    // Buy and sell T2 with loss
+    engine.process_event(make_fill(W1, T2, FillSide::BUY, 10'000'000, 800'000, 0, 102));
+    engine.process_event(make_fill(W1, T2, FillSide::SELL, 10'000'000, 600'000, 0, 103));
+
+    auto summary = engine.get_wallet_summary(W1);
+    EXPECT_EQ(summary.winning_markets, 1);
+    EXPECT_EQ(summary.losing_markets, 1);
+
+    auto lb = engine.get_leaderboard(10);
+    ASSERT_FALSE(lb.empty());
+    EXPECT_EQ(lb[0].winning_markets, 1);
+    EXPECT_EQ(lb[0].total_markets, 2);
+}

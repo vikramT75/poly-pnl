@@ -197,7 +197,10 @@ class IngestionPipeline:
         async for mark in self.clob_ws.stream_marks():
             if not self.running:
                 break
-            pass
+            try:
+                await self.emitter.emit_mark(mark.token_id, mark.mark_price)
+            except Exception:
+                pass
 
     async def stop(self) -> None:
         self.running = False

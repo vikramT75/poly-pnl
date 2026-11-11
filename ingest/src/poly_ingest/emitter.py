@@ -55,6 +55,17 @@ def encode_rollback(rollback_block: int) -> bytes:
     payload = b"ROLL" + struct.pack("<Q", rollback_block)
     return struct.pack("<I", len(payload)) + payload
 
+def encode_mark(token_id: str, mark_price: int) -> bytes:
+    """Encode mark command: [4-byte len=44][4-byte 'MARK'][32-byte token_id][8-byte int64 mark_price]"""
+    token_str = str(token_id).strip()
+    if token_str.startswith("0x") or token_str.startswith("0X"):
+        raw_int = int(token_str, 16)
+    else:
+        raw_int = int(token_str)
+    token_bytes = raw_int.to_bytes(32, byteorder="big")
+    payload = b"MARK" + token_bytes + struct.pack("<q", mark_price)
+    return struct.pack("<I", len(payload)) + payload
+
 class EngineEmitter:
     def __init__(self, host: str = "127.0.0.1", port: int = 9999, socket_path: Optional[str] = None) -> None:
         self.host = host
@@ -110,6 +121,23 @@ class EngineEmitter:
         assert self.writer is not None
         self.writer.write(frame)
         await self.writer.drain()
+
+    async def emit_mark(self, token_id: str, mark_price: int) -> None:
+        try:
+            frame = encode_mark(token_id, mark_price)
+        except Exception:
+            return
+        if not self.writer:
+            await self.connect()
+        try:
+            assert self.writer is not None
+            self.writer.write(frame)
+            await self.writer.drain()
+        except Exception:
+            await self.connect()
+            if self.writer:
+                self.writer.write(frame)
+                await self.writer.drain()
 
     async def close(self) -> None:
         if self.writer:

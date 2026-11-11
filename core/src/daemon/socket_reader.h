@@ -5,6 +5,7 @@
 #include <thread>
 #include "decoder.h"
 #include "engine.h"
+#include "intern_table.h"
 
 namespace polypnl {
 namespace daemon {
@@ -13,7 +14,8 @@ class SocketReader {
 public:
     SocketReader(std::string socket_path,
                  decoder::Decoder& decoder,
-                 engine::PnLEngine& engine);
+                 engine::PnLEngine& engine,
+                 TokenInternTable& token_table);
     ~SocketReader();
 
     void start();
@@ -25,6 +27,7 @@ private:
     std::string socket_path_;
     decoder::Decoder& decoder_;
     engine::PnLEngine& engine_;
+    TokenInternTable& token_table_;
     std::atomic<bool> running_{false};
     std::thread worker_thread_;
 };

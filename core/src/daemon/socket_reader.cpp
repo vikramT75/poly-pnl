@@ -27,10 +27,12 @@ namespace daemon {
 
 SocketReader::SocketReader(std::string socket_path,
                            decoder::Decoder& decoder,
-                           engine::PnLEngine& engine)
+                           engine::PnLEngine& engine,
+                           TokenInternTable& token_table)
     : socket_path_(std::move(socket_path)),
       decoder_(decoder),
-      engine_(engine) {}
+      engine_(engine),
+      token_table_(token_table) {}
 
 SocketReader::~SocketReader() {
     stop();
@@ -129,11 +131,22 @@ void SocketReader::run() {
             // 1. RawLog struct (sizeof(RawLog))
             // 2. NormalizedEvent batch (multiple of 64 bytes)
             // 3. Rollback command: sentinel starting with magic 0x524F4C4C ("ROLL")
+            // 4. Mark update command: sentinel starting with magic 0x4D41524B ("MARK")
             if (frame_len >= 8 && std::memcmp(buffer.data(), "ROLL", 4) == 0) {
                 uint64_t rollback_block = 0;
                 std::memcpy(&rollback_block, buffer.data() + 4, sizeof(uint64_t));
                 std::cout << "[SocketReader] Rollback command received for block " << rollback_block << std::endl;
                 engine_.rollback(rollback_block);
+                continue;
+            }
+
+            if (frame_len == 44 && std::memcmp(buffer.data(), "MARK", 4) == 0) {
+                uint8_t token_id_bytes[32];
+                std::memcpy(token_id_bytes, buffer.data() + 4, 32);
+                int64_t mark_price = 0;
+                std::memcpy(&mark_price, buffer.data() + 36, sizeof(int64_t));
+                TokenIdx t_idx = token_table_.intern(token_id_bytes);
+                engine_.update_mark(t_idx, mark_price);
                 continue;
             }
 

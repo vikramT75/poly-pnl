@@ -37,3 +37,15 @@ def test_rollback_frame():
     assert magic == b"ROLL"
     rb_block = struct.unpack("<Q", frame[8:16])[0]
     assert rb_block == 86126998
+
+def test_mark_frame():
+    from poly_ingest.emitter import encode_mark
+    frame = encode_mark("12345", 650000)
+    frame_len = struct.unpack("<I", frame[:4])[0]
+    assert frame_len == 44
+    magic = frame[4:8]
+    assert magic == b"MARK"
+    token_bytes = frame[8:40]
+    assert int.from_bytes(token_bytes, byteorder="big") == 12345
+    mark_price = struct.unpack("<q", frame[40:48])[0]
+    assert mark_price == 650000
